@@ -1,0 +1,32 @@
+name: Render Emu War frame sheet
+on:
+  workflow_dispatch:
+jobs:
+  render-frame-sheet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: emu-war-production
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+      - name: Install Remotion browser
+        run: npx remotion browser ensure
+      - name: Render selected frames from the actual Remotion composition
+        run: |
+          mkdir -p out/emu
+          node scripts/bridge-stills.mjs out/emu/frame- 0,6,12,18,24,30,35 0.5 EmuWarOpening
+      - name: Assemble contact sheet
+        run: |
+          montage out/emu/frame-*.jpg -tile 3x -geometry 540x960+10+10 -background "#211b25" out/emu/emu-war-frame-sheet.jpg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: emu-war-opening-frame-sheet
+          path: out/emu/emu-war-frame-sheet.jpg
+          if-no-files-found: error
+          retention-days: 7
