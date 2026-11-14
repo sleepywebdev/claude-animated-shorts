@@ -1,7 +1,7 @@
 name: Typecheck
 on:
   push:
-    branches: [emu-war-production]
+    branches: [emu-war-production, zombie-bunker-experiment]
   workflow_dispatch:
 jobs:
   typecheck:
