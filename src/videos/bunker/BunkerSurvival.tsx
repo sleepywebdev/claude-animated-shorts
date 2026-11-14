@@ -8,22 +8,27 @@ const fade = (f:number,a:number,b:number)=>clamp(Math.min((f-a)/12,(b-f)/12),0,1
 
 const Figure:React.FC<{x:number;y:number;s?:number;kind?:"owner"|"survivor"|"infected";pose?:number}> = ({x,y,s=1,kind="owner",pose=0})=>{
  const infected=kind==="infected", survivor=kind==="survivor";
- const coat=infected?"#52645a":survivor?"#c66b4c":"#35566b";
- const skin=infected?"#b6b78b":"#e7b895";
- return <g transform={`translate(${x} ${y}) scale(${s})`} stroke="#172330" strokeWidth="4" strokeLinejoin="round" strokeLinecap="round">
-  <ellipse cx="0" cy="2" rx="29" ry="8" fill="#0b1722" opacity=".28" stroke="none"/>
-  <path d={pose?"M-9 75 L-17 126 L-34 163 L-9 166 L12 126 L22 166 L47 164 L27 118 L21 74Z":"M-12 75 L-18 124 L-32 163 L-8 166 L12 126 L23 165 L47 163 L27 119 L19 75Z"} fill={infected?"#293d3b":"#26394a"}/>
-  <path d="M-25 37 Q-38 47 -30 87 L-22 106 Q0 117 25 104 L31 48 Q15 29 -25 37Z" fill={coat}/>
-  <path d="M-18 43 L-3 55 L-10 100 L-23 96Z" fill="#ffffff" opacity=".12" stroke="none"/>
-  <path d="M-26 48 Q-49 54 -51 83 L-42 91 L-24 72" fill="none" stroke={coat} strokeWidth="13"/>
-  <path d={pose?"M22 48 Q45 24 58 12":"M22 48 Q43 56 52 78"} fill="none" stroke={coat} strokeWidth="14"/>
-  <path d={pose?"M58 12 l9 -7":"M52 78 l9 6"} fill="none" stroke={skin} strokeWidth="10"/>
-  <path d="M-13 35 L-5 57 L8 58 L17 34" fill="#d6d4c8" strokeWidth="3"/>
-  <path d="M-23 12 Q-26 -19 -1 -24 Q24 -21 23 8 L15 31 Q-5 42 -20 24Z" fill={skin}/>
-  <path d="M-25 4 Q-27 -25 -3 -29 Q19 -31 27 -8 L22 1 Q10 -11 -3 -8 Q-13 -2 -25 4Z" fill={infected?"#39483d":"#3a2d2b"} strokeWidth="3"/>
-  {infected?<path d="M-11 13 l8 2 M9 12 l7 -3 M-2 27 l13 -4" stroke="#6e3535" strokeWidth="3"/>:<><circle cx="-8" cy="12" r="2.6" fill="#172330" stroke="none"/><circle cx="10" cy="12" r="2.6" fill="#172330" stroke="none"/><path d="M-4 25 Q3 28 9 23" fill="none" strokeWidth="2.5"/></>}
-  {survivor&&<path d="M-24 0 Q-3 -33 25 -4 L21 3 Q-2 -8 -24 10Z" fill="#c7a36c"/>}
-  {infected&&<path d="M-20 31 l10 4 7 -4" fill="none" stroke="#8b3035" strokeWidth="4"/>}
+ const body=infected?"#74836b":survivor?"#e0a16d":"#5e9ac2";
+ const limb=infected?"#66765f":survivor?"#d58b5e":"#477ca6";
+ const skin=infected?"#b9c39a":"#f1c9a6";
+ const armA=pose?"M-13 -5 Q-35 -34 -48 -52":"M-13 -5 Q-35 5 -42 28";
+ const armB=pose?"M13 -5 Q34 -28 48 -48":"M13 -5 Q34 7 42 27";
+ return <g transform={`translate(${x} ${y}) scale(${s})`} stroke="#172330" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round">
+  <ellipse cx="0" cy="5" rx="31" ry="8" fill="#07131d" opacity=".28" stroke="none"/>
+  {survivor&&<path d="M-18 -3L-30 10L-21 34L-9 28Z" fill="#8c493d" stroke="#172330" strokeWidth="3"/>}
+  <path d="M-10 17L-18 57L-23 91 M10 17L18 57L26 91" fill="none" stroke="#172330" strokeWidth="17"/>
+  <path d="M-10 17L-18 57L-23 91 M10 17L18 57L26 91" fill="none" stroke={limb} strokeWidth="11"/>
+  <path d="M-25 92L-9 92 M20 92L37 92" fill="none" stroke="#e4e8e8" strokeWidth="10"/>
+  <path d="M-16 -12Q-22 -4 -21 15L-17 35Q0 44 18 34L21 8Q20 -11 13 -17Z" fill={body}/>
+  <path d="M-8 -8L0 1L8 -8" fill="none" stroke="#dce8e9" strokeWidth="3" opacity=".9"/>
+  <path d={armA} fill="none" stroke="#172330" strokeWidth="16"/><path d={armB} fill="none" stroke="#172330" strokeWidth="16"/>
+  <path d={armA} fill="none" stroke={limb} strokeWidth="10"/><path d={armB} fill="none" stroke={limb} strokeWidth="10"/>
+  <circle cx={pose?-51:-44} cy={pose?-55:31} r="7" fill={skin} strokeWidth="3"/>
+  <circle cx={pose?51:44} cy={pose?-51:30} r="7" fill={skin} strokeWidth="3"/>
+  <path d="M-11 -17Q-17 -25 -17 -42Q-17 -68 0 -70Q18 -68 18 -43L14 -17Q0 -6 -11 -17Z" fill={skin}/>
+  {infected?<><path d="M-18 -49Q-20 -76 1 -77Q21 -74 18 -48L10 -55L3 -48L-5 -58L-13 -49Z" fill="#455b45"/><path d="M-9 -37L-3 -36 M7 -37L12 -40" stroke="#8e3636" strokeWidth="4"/><path d="M-5 -21L8 -25" stroke="#8e3636" strokeWidth="3"/></>:<><path d="M-18 -48Q-19 -72 1 -74Q18 -71 19 -48L12 -56Q0 -63 -10 -53Z" fill={survivor?"#60432e":"#263c50"}/><circle cx="-7" cy="-40" r="2.7" fill="#172330" stroke="none"/><circle cx="8" cy="-40" r="2.7" fill="#172330" stroke="none"/>{survivor?<path d="M-5 -26Q1 -32 7 -26" fill="none" stroke="#8b4540" strokeWidth="3"/>:<path d="M-4 -27Q1 -24 6 -27" fill="none" stroke="#8b4540" strokeWidth="2.5"/>}</>}
+  {survivor&&<path d="M-18 -10L-30 5L-20 17L-8 2" fill="#d58b5e" strokeWidth="3"/>}
+  {infected&&<path d="M-16 5L-7 13L2 5L12 13" fill="none" stroke="#8e3636" strokeWidth="4"/>}
  </g>;
 };
 
