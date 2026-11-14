@@ -28,7 +28,24 @@ jobs:
           node scripts/bridge-stills.mjs out/bunker/frame- 0,120,270,390,540,690,810,960,1100,1199 0.5 BunkerSurvival
       - name: Assemble contact sheet
         run: |
-          montage out/bunker/frame-*.jpg -tile 5x -geometry 540x960+10+10 -background "#111c2c" out/bunker/bunker-frame-sheet.jpg
+          python -m pip install pillow
+          python - <<'PY'
+          from PIL import Image, ImageOps, ImageDraw
+          from pathlib import Path
+          files = sorted(Path("out/bunker").glob("frame-*.jpg"))
+          if len(files) != 10:
+              raise SystemExit(f"Expected 10 rendered frames, found {len(files)}: {files}")
+          thumb_w, thumb_h, gap, margin = 324, 576, 18, 24
+          sheet = Image.new("RGB", (margin*2 + thumb_w*5 + gap*4, margin*2 + thumb_h*2 + gap), "#111c2c")
+          for i, path in enumerate(files):
+              im = Image.open(path).convert("RGB")
+              im = ImageOps.fit(im, (thumb_w, thumb_h))
+              x = margin + (i % 5) * (thumb_w + gap)
+              y = margin + (i // 5) * (thumb_h + gap)
+              sheet.paste(im, (x, y))
+          sheet.save("out/bunker/bunker-frame-sheet.jpg", quality=92)
+          print(f"Contact sheet assembled from {len(files)} actual Remotion frames")
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: zombie-bunker-frame-sheet
