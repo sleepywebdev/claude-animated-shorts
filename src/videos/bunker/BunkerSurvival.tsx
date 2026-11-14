@@ -1,266 +1,158 @@
-import React, { useMemo } from "react";
-import * as THREE from "three";
+import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
-import { ThreeCanvas } from "@remotion/three";
-import { useThree } from "@react-three/fiber";
 
 export const BUNKER_FRAMES = 1200;
-const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-const smooth = (a: number, b: number, x: number) => {
-  const t = clamp((x - a) / (b - a), 0, 1);
-  return t * t * (3 - 2 * t);
+const clamp = (v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
+const ease = (a:number,b:number,f:number)=>{const t=clamp((f-a)/(b-a),0,1);return t*t*(3-2*t);};
+const fade = (f:number,a:number,b:number)=>clamp(Math.min((f-a)/12,(b-f)/12),0,1);
+
+const Figure:React.FC<{x:number;y:number;s?:number;kind?:"owner"|"survivor"|"infected";pose?:number}> = ({x,y,s=1,kind="owner",pose=0})=>{
+ const infected=kind==="infected", survivor=kind==="survivor";
+ const coat=infected?"#52645a":survivor?"#c66b4c":"#35566b";
+ const skin=infected?"#b6b78b":"#e7b895";
+ return <g transform={`translate(${x} ${y}) scale(${s})`} stroke="#172330" strokeWidth="4" strokeLinejoin="round" strokeLinecap="round">
+  <ellipse cx="0" cy="2" rx="29" ry="8" fill="#0b1722" opacity=".28" stroke="none"/>
+  <path d={pose?"M-9 75 L-17 126 L-34 163 L-9 166 L12 126 L22 166 L47 164 L27 118 L21 74Z":"M-12 75 L-18 124 L-32 163 L-8 166 L12 126 L23 165 L47 163 L27 119 L19 75Z"} fill={infected?"#293d3b":"#26394a"}/>
+  <path d="M-25 37 Q-38 47 -30 87 L-22 106 Q0 117 25 104 L31 48 Q15 29 -25 37Z" fill={coat}/>
+  <path d="M-18 43 L-3 55 L-10 100 L-23 96Z" fill="#ffffff" opacity=".12" stroke="none"/>
+  <path d="M-26 48 Q-49 54 -51 83 L-42 91 L-24 72" fill="none" stroke={coat} strokeWidth="13"/>
+  <path d={pose?"M22 48 Q45 24 58 12":"M22 48 Q43 56 52 78"} fill="none" stroke={coat} strokeWidth="14"/>
+  <path d={pose?"M58 12 l9 -7":"M52 78 l9 6"} fill="none" stroke={skin} strokeWidth="10"/>
+  <path d="M-13 35 L-5 57 L8 58 L17 34" fill="#d6d4c8" strokeWidth="3"/>
+  <path d="M-23 12 Q-26 -19 -1 -24 Q24 -21 23 8 L15 31 Q-5 42 -20 24Z" fill={skin}/>
+  <path d="M-25 4 Q-27 -25 -3 -29 Q19 -31 27 -8 L22 1 Q10 -11 -3 -8 Q-13 -2 -25 4Z" fill={infected?"#39483d":"#3a2d2b"} strokeWidth="3"/>
+  {infected?<path d="M-11 13 l8 2 M9 12 l7 -3 M-2 27 l13 -4" stroke="#6e3535" strokeWidth="3"/>:<><circle cx="-8" cy="12" r="2.6" fill="#172330" stroke="none"/><circle cx="10" cy="12" r="2.6" fill="#172330" stroke="none"/><path d="M-4 25 Q3 28 9 23" fill="none" strokeWidth="2.5"/></>}
+  {survivor&&<path d="M-24 0 Q-3 -33 25 -4 L21 3 Q-2 -8 -24 10Z" fill="#c7a36c"/>}
+  {infected&&<path d="M-20 31 l10 4 7 -4" fill="none" stroke="#8b3035" strokeWidth="4"/>}
+ </g>;
 };
 
-const Segment: React.FC<{ a: [number, number]; b: [number, number]; color?: string; radius?: number }> = ({ a, b, color = "#20232b", radius = 0.055 }) => {
-  const dx = b[0] - a[0], dy = b[1] - a[1];
-  const length = Math.hypot(dx, dy);
-  return (
-    <mesh position={[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 0]} rotation={[0, 0, -Math.atan2(dx, dy)]}>
-      <cylinderGeometry args={[radius, radius, length, 10]} />
-      <meshStandardMaterial color={color} roughness={0.8} />
-    </mesh>
-  );
+const BunkerArt:React.FC<{f:number}>=({f})=>{
+ const reveal=ease(250,350,f), push=ease(350,600,f), alarm=ease(780,850,f);
+ const exterior=1-push;
+ const camera=push*18;
+ const door=ease(260,390,f);
+ const pulse=(Math.sin(f*.24)+1)/2;
+ return <svg viewBox="0 0 540 960" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+ <defs>
+  <linearGradient id="sky" x2="0" y2="1"><stop stopColor="#182b3d"/><stop offset="1" stopColor="#64717a"/></linearGradient>
+  <linearGradient id="earth" x2="0" y2="1"><stop stopColor="#5d5c4a"/><stop offset="1" stopColor="#292f2c"/></linearGradient>
+  <linearGradient id="concrete" x2="1" y2="1"><stop stopColor="#aeb1a8"/><stop offset=".48" stopColor="#6f7775"/><stop offset="1" stopColor="#424c50"/></linearGradient>
+  <linearGradient id="inside" x2="0" y2="1"><stop stopColor="#344654"/><stop offset="1" stopColor="#101c29"/></linearGradient>
+  <linearGradient id="door" x2="1" y2="1"><stop stopColor="#91a0a4"/><stop offset=".25" stopColor="#394953"/><stop offset=".65" stopColor="#1d2b36"/><stop offset="1" stopColor="#68757a"/></linearGradient>
+  <radialGradient id="glow"><stop stopColor="#ffbf78" stopOpacity=".9"/><stop offset="1" stopColor="#ff8b4d" stopOpacity="0"/></radialGradient>
+  <pattern id="grain" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M4 8l5 -2 M21 24l7 -3 M11 31l3 -1" stroke="#e2dfd1" strokeOpacity=".14" strokeWidth="1.5"/></pattern>
+  <pattern id="hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><path d="M0 0V12" stroke="#0b1722" strokeOpacity=".18" strokeWidth="3"/></pattern>
+ </defs>
+ <rect width="540" height="960" fill="#101c29"/>
+ <g transform={`translate(0 ${-camera})`}>
+  <rect width="540" height="490" fill="url(#sky)"/>
+  <circle cx="425" cy="160" r="145" fill="url(#glow)" opacity={.55*(1-push)}/>
+  <path d="M0 350 Q100 295 185 340 T360 330 T540 340 V570 H0Z" fill="#263b36"/>
+  <path d="M0 400 Q110 354 230 390 T540 365 V600 H0Z" fill="#344638"/>
+  <g opacity=".7" fill="#182d29"><path d="M20 365l20 -105 20 105z M63 372l25 -145 25 145z M410 370l22 -132 22 132z M468 370l24 -105 24 105z"/></g>
+  <path d="M0 445 L540 445 V960 H0Z" fill="url(#earth)"/>
+  <path d="M0 453 Q270 420 540 453" fill="none" stroke="#8e8768" strokeWidth="8"/>
+  <g transform="translate(0 0)">
+   <path d="M44 457 L44 320 Q44 278 86 278 H454 Q496 278 496 320 V457Z" fill="url(#concrete)" stroke="#d1d0c4" strokeWidth="8"/>
+   <path d="M54 450 V325 Q54 291 91 291 H449 Q486 291 486 325 V450Z" fill="url(#inside)" stroke="#253744" strokeWidth="5"/>
+   <path d="M44 320 Q44 278 86 278 H454 Q496 278 496 320" fill="none" stroke="#d7d4c8" strokeWidth="12"/>
+   <path d="M44 278 H496 L475 250 H65Z" fill="#66705d" stroke="#a0a28b" strokeWidth="5"/>
+   <path d="M54 291 H486 V450 H54Z" fill="url(#grain)" opacity=".7"/>
+   <g opacity={1-push}>
+    <path d="M0 458 L540 458 L540 495 L0 495Z" fill="#b58c5a"/>
+    <path d="M0 468H540" stroke="#f1c47a" strokeWidth="4" strokeDasharray="18 12"/>
+   </g>
+   <g transform="translate(270 367)">
+    <circle r="83" fill="#172630" stroke="#b3b9b5" strokeWidth="12"/>
+    <circle r="68" fill="url(#door)" stroke="#1b2932" strokeWidth="7"/>
+    <circle r="54" fill="none" stroke="#87969a" strokeWidth="4"/>
+    <circle r="37" fill="none" stroke="#263944" strokeWidth="8"/>
+    <path d="M-7 -57 H7 V57 H-7Z M-57 -7H57V7H-57Z" fill="#a6b2b3" opacity=".6"/>
+    {Array.from({length:16},(_,i)=><circle key={i} cx={Math.cos(i*Math.PI/8)*75} cy={Math.sin(i*Math.PI/8)*75} r="4.5" fill="#e0c58e" stroke="#263944" strokeWidth="2"/>)}
+    <g transform={`translate(${door*140} 0) rotate(${door*80})`}><path d="M-80 -83 Q-94 -92 -103 -70 V70 Q-94 92 -80 83Z" fill="#293c47" stroke="#aeb8b7" strokeWidth="5"/></g>
+   </g>
+   <g opacity={push}>
+    <path d="M72 420 V328 H115 V420 M425 420 V328 H468 V420" fill="#53636a" stroke="#a7b0ad" strokeWidth="5"/>
+    <path d="M82 347H105 M82 365H105 M435 347H458 M435 365H458" stroke="#d6b36d" strokeWidth="4"/>
+    <g transform="translate(112 360)"><rect x="-22" y="-56" width="44" height="110" rx="5" fill="#273b48" stroke="#9da9a5" strokeWidth="4"/><path d="M-13 -35H13 M-13 -20H13 M-13 -5H13" stroke="#e1b66d" strokeWidth="4"/><circle cy="28" r="8" fill="#64c6bd"/></g>
+    <g transform="translate(425 350)"><rect x="-35" y="-42" width="70" height="85" rx="5" fill="#1a2c39" stroke="#7f9599" strokeWidth="4"/><rect x="-25" y="-30" width="50" height="38" fill="#1b6570"/><path d="M-18 -12L-5 -22L7 -4L18 -17" fill="none" stroke="#8be2d4" strokeWidth="3"/><circle cx="0" cy="23" r="5" fill="#f2b75f"/></g>
+    <g transform="translate(170 420)"><rect x="-34" y="-38" width="68" height="75" fill="#594c3d" stroke="#b59c73" strokeWidth="4"/><path d="M-24 -25H24 M-24 -8H24 M-24 9H24" stroke="#d8bd8c" strokeWidth="3"/><rect x="-25" y="-31" width="15" height="12" fill="#a5ad79"/><rect x="4" y="-31" width="18" height="12" fill="#b87850"/></g>
+    <g transform="translate(350 420)"><rect x="-32" y="-48" width="64" height="90" rx="4" fill="#394a4d" stroke="#a3aca4" strokeWidth="4"/><path d="M-23 -28H23 M-23 -12H23 M-23 4H23" stroke="#7f9d91" strokeWidth="5"/><circle cy="27" r="12" fill="#c68a55"/></g>
+   </g>
+   <path d="M55 445H485" stroke="#d8c8a0" strokeWidth="6"/>
+  </g>
+  <g opacity={1-push}>
+   <path d="M0 500 Q110 475 220 500 T540 492 V620 H0Z" fill="#353d35"/>
+   <path d="M0 515H540" stroke="#c4a36b" strokeWidth="3" strokeDasharray="16 14"/>
+   <g transform="translate(120 440)"><path d="M-55 0l-18 -36 35 8 16 -31 18 35 34 -8 -17 38Z" fill="#445847"/><path d="M-8 -20V-82" stroke="#293d34" strokeWidth="5"/></g>
+   <g transform="translate(420 440)"><path d="M-55 0l-18 -36 35 8 16 -31 18 35 34 -8 -17 38Z" fill="#445847"/><path d="M-8 -20V-82" stroke="#293d34" strokeWidth="5"/></g>
+  </g>
+  <g opacity={push}>
+   <rect x="0" y="470" width="540" height="490" fill="url(#inside)"/>
+   <path d="M0 470 L540 470 L540 510 L0 510Z" fill="#253946"/>
+   <path d="M0 510H540 M0 890H540" stroke="#8c9a98" strokeOpacity=".35" strokeWidth="5"/>
+   <path d="M0 510L60 540V900L0 930Z M540 510L480 540V900L540 930Z" fill="#263b48" stroke="#819092" strokeWidth="4"/>
+   <path d="M0 520L60 548 M540 520L480 548" stroke="#d2b57b" strokeWidth="5"/>
+   <g opacity=".9">
+    <path d="M75 550H190V565H75Z M75 660H190V675H75Z M75 770H190V785H75Z" fill="#6c7774"/>
+    <path d="M350 550H465V565H350Z M350 660H465V675H350Z M350 770H465V785H350Z" fill="#6c7774"/>
+    {Array.from({length:6},(_,i)=><g key={i}><rect x={82+(i%3)*32} y={580+Math.floor(i/3)*105} width="24" height="35" rx="3" fill={i%2?"#9b8057":"#7c936d"} stroke="#1c2c35" strokeWidth="3"/><path d={`M${85+(i%3)*32} ${590+Math.floor(i/3)*105}h18`} stroke="#d5c6a2" strokeWidth="3"/></g>)}
+    <g transform="translate(270 770)"><rect x="-75" y="-65" width="150" height="115" rx="7" fill="#39484a" stroke="#9ca9a3" strokeWidth="5"/><rect x="-60" y="-48" width="120" height="52" fill="#102e3c" stroke="#7b999a" strokeWidth="3"/><path d="M-48 -24L-24 -34L-3 -15L20 -37L45 -18" fill="none" stroke="#66c5b5" strokeWidth="4"/><circle cx="0" cy="26" r="13" fill="#b28a54"/><path d="M-45 55V77 M45 55V77" stroke="#9ca9a3" strokeWidth="8"/></g>
+    <path d="M65 845H475" stroke="#73817d" strokeWidth="5"/>
+    <path d="M85 875H455" stroke="#8b9a93" strokeWidth="3" strokeDasharray="12 10"/>
+   </g>
+   <g transform="translate(270 535)"><path d="M-190 0H190" stroke="#879694" strokeWidth="6"/><path d="M-170 0V25 M170 0V25" stroke="#879694" strokeWidth="6"/><path d="M-130 0V18 M-65 0V18 M0 0V18 M65 0V18 M130 0V18" stroke="#c3a46e" strokeWidth="4"/></g>
+  </g>
+  <g transform={`translate(0 0)`} opacity={1-push}>
+   <Figure x={270} y={490} s={.92} kind="owner"/>
+  </g>
+  <g opacity={reveal}>
+   <Figure x={270} y={478} s={.86} kind="survivor" pose={1}/>
+   <g transform={`translate(${350+Math.sin(f*.08)*8} 470)`}><path d="M-12 55Q-26 5 3 -18Q26 0 22 56Z" fill="#111b22" stroke="#070e15" strokeWidth="4"/><path d="M0 -8l14 18" stroke="#7e3836" strokeWidth="4"/></g>
+  </g>
+  <g opacity={alarm}>
+   <rect x="0" y="450" width="540" height="510" fill="#b72e2b" opacity={pulse*.12}/>
+   <path d="M40 470H500" stroke="#ed4b43" strokeWidth="5" opacity={pulse}/>
+   <g transform="translate(270 515)"><rect x="-45" y="-14" width="90" height="28" rx="14" fill="#a82e2b" stroke="#ff9d80" strokeWidth="3"/><circle r="5" fill="#ffe1b0"/></g>
+   <Figure x={270} y={478} s={.88} kind="survivor" pose={1}/>
+   <Figure x={395} y={465} s={1.1} kind="infected" pose={1}/>
+  </g>
+ </g>
+ <rect width="540" height="960" fill="url(#hatch)" opacity=".18" pointerEvents="none"/>
+ <path d="M0 0H540V960H0Z" fill="none" stroke="#0a1119" strokeWidth="18"/>
+ </svg>;
 };
 
-/** Flat, hand-built vector stick figure. The character is deliberately graphic, not a 3D human. */
-const Stickman: React.FC<{ x: number; y?: number; z: number; scale?: number; zombie?: boolean; pose?: number }> = ({ x, y = 0, z, scale = 1, zombie = false, pose = 0 }) => {
-  const ink = "#171923";
-  const skin = zombie ? "#a8b98a" : "#fff0d8";
-  const shirt = zombie ? "#5b6250" : "#e45c43";
-  const armA: [number, number] = pose ? [-0.55, 1.28] : [-0.48, 1.35];
-  const armB: [number, number] = pose ? [0.72, 1.52] : [0.5, 1.28];
-  return (
-    <group position={[x, y, z]} scale={scale}>
-      <Segment a={[0, 1.28]} b={[0, 0.73]} color={ink} radius={0.075} />
-      <mesh position={[0, 1.62, 0.015]}>
-        <circleGeometry args={[0.245, 32]} />
-        <meshBasicMaterial color={skin} />
-      </mesh>
-      <mesh position={[0, 1.62, -0.005]}>
-        <torusGeometry args={[0.245, 0.026, 8, 32]} />
-        <meshBasicMaterial color={ink} />
-      </mesh>
-      <mesh position={[-0.075, 1.67, 0.04]}><circleGeometry args={[0.025, 12]} /><meshBasicMaterial color={ink} /></mesh>
-      <mesh position={[0.075, 1.67, 0.04]}><circleGeometry args={[0.025, 12]} /><meshBasicMaterial color={ink} /></mesh>
-      {zombie && <mesh position={[0, 1.54, 0.045]}><boxGeometry args={[0.12, 0.018, 0.01]} /><meshBasicMaterial color="#7e2829" /></mesh>}
-      <mesh position={[0, 1.02, 0.025]}><capsuleGeometry args={[0.16, 0.34, 4, 8]} /><meshStandardMaterial color={shirt} roughness={0.9} /></mesh>
-      <Segment a={[0, 0.77]} b={[-0.28, 0.08]} radius={0.065} />
-      <Segment a={[0, 0.77]} b={[0.3, 0.08]} radius={0.065} />
-      <Segment a={[0, 1.26]} b={armA} radius={0.06} />
-      <Segment a={[0, 1.26]} b={armB} radius={0.06} />
-      <mesh position={[-0.28, 0.055, 0]}><sphereGeometry args={[0.09, 10, 8]} /><meshStandardMaterial color={ink} /></mesh>
-      <mesh position={[0.3, 0.055, 0]}><sphereGeometry args={[0.09, 10, 8]} /><meshStandardMaterial color={ink} /></mesh>
-      <mesh position={[armA[0], armA[1], 0]}><sphereGeometry args={[0.075, 10, 8]} /><meshStandardMaterial color={skin} /></mesh>
-      <mesh position={[armB[0], armB[1], 0]}><sphereGeometry args={[0.075, 10, 8]} /><meshStandardMaterial color={skin} /></mesh>
-      {!zombie && <group position={[-0.23, 0.94, -0.13]}><mesh><boxGeometry args={[0.28, 0.38, 0.2]} /><meshStandardMaterial color="#354b59" roughness={0.95} /></mesh><mesh position={[0, -0.21, 0.02]}><boxGeometry args={[0.34, 0.07, 0.23]} /><meshStandardMaterial color="#c49a5a" /></mesh></group>}
-    </group>
-  );
-};
-
-const BoltRing: React.FC<{ radius: number; count: number; z: number }> = ({ radius, count, z }) => (
-  <>
-    {Array.from({ length: count }, (_, i) => {
-      const a = (i / count) * Math.PI * 2;
-      return <mesh key={i} position={[Math.cos(a) * radius, 2.5 + Math.sin(a) * radius, z]} rotation={[Math.PI / 2, 0, a]}>
-        <cylinderGeometry args={[0.065, 0.065, 0.075, 8]} />
-        <meshStandardMaterial color="#aeb8c0" metalness={0.82} roughness={0.3} />
-      </mesh>;
-    })}
-  </>
-);
-
-const Pipe: React.FC<{ a: [number, number, number]; b: [number, number, number]; radius?: number; color?: string }> = ({ a, b, radius = 0.08, color = "#596875" }) => {
-  const va = new THREE.Vector3(...a), vb = new THREE.Vector3(...b);
-  const mid = va.clone().add(vb).multiplyScalar(0.5);
-  const dir = vb.clone().sub(va);
-  return <mesh position={mid.toArray()} quaternion={new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize())}>
-    <cylinderGeometry args={[radius, radius, dir.length(), 12]} />
-    <meshStandardMaterial color={color} metalness={0.72} roughness={0.36} />
-  </mesh>;
-};
-
-const BunkerWorld: React.FC = () => {
-  const f = useCurrentFrame();
-  const { camera } = useThree();
-  const doorOpen = smooth(255, 345, f) * 1.45;
-  const enter = smooth(340, 570, f);
-  const tension = smooth(650, 810, f);
-  const camX = THREE.MathUtils.lerp(8.5, 0.2, enter);
-  const camY = THREE.MathUtils.lerp(6.2, 2.8, enter);
-  const camZ = THREE.MathUtils.lerp(18.5, 5.6, enter);
-  camera.position.set(camX, camY + Math.sin(f / 75) * 0.035, camZ);
-  camera.lookAt(0, THREE.MathUtils.lerp(2.2, 2.35, enter), THREE.MathUtils.lerp(-0.8, -4.6, enter));
-  camera.updateProjectionMatrix();
-
-  const concrete = useMemo(() => {
-    const n = 128, data = new Uint8Array(n * n * 4);
-    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-      const i = (y * n + x) * 4;
-      const v = 112 + Math.round(20 * Math.sin(x * 0.31) * Math.cos(y * 0.27) + 13 * Math.sin((x + y) * 0.71));
-      data[i] = v; data[i + 1] = v; data[i + 2] = v; data[i + 3] = 255;
-    }
-    const t = new THREE.DataTexture(data, n, n, THREE.RGBAFormat);
-    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 2); t.colorSpace = THREE.SRGBColorSpace; t.needsUpdate = true;
-    return t;
-  }, []);
-  const concreteMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#c3c5c3", map: concrete, roughness: 0.92 }), [concrete]);
-  const steel = useMemo(() => new THREE.MeshStandardMaterial({ color: "#34414b", metalness: 0.86, roughness: 0.27 }), []);
-  const floorMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#454b50", roughness: 0.88 }), []);
-  const alarmOn = f > 790 && Math.floor(f / 12) % 2 === 0;
-
-  return (
-    <>
-      <color attach="background" args={["#111c2c"]} />
-      <fog attach="fog" args={["#172536", 17, 42]} />
-      <ambientLight intensity={0.48} color="#8fa6c4" />
-      <directionalLight position={[-8, 12, 8]} intensity={2.2} color="#ffbd86" castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
-      <pointLight position={[0, 4, 3]} intensity={2.4} color="#ff7d48" distance={17} />
-      <pointLight position={[0, 3.6, -6]} intensity={1.8} color={alarmOn ? "#ff1717" : "#5a9bce"} distance={12} />
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, 0]} receiveShadow>
-        <planeGeometry args={[90, 90, 1, 1]} />
-        <meshStandardMaterial color="#343b3a" roughness={1} />
-      </mesh>
-      {/* Cutaway bunker shell: the four concrete sections leave a real opening for the blast door. */}
-      <mesh position={[-3.55, 2.9, -4.4]} material={concreteMat} castShadow receiveShadow><boxGeometry args={[3.9, 5.8, 1.2]} /></mesh>
-      <mesh position={[3.55, 2.9, -4.4]} material={concreteMat} castShadow receiveShadow><boxGeometry args={[3.9, 5.8, 1.2]} /></mesh>
-      <mesh position={[0, 5.25, -4.4]} material={concreteMat} castShadow receiveShadow><boxGeometry args={[3.2, 1.1, 1.2]} /></mesh>
-      <mesh position={[0, 0.35, -4.4]} material={concreteMat} castShadow receiveShadow><boxGeometry args={[3.2, 0.7, 1.2]} /></mesh>
-      <mesh position={[0, 5.95, -4.4]} material={concreteMat} castShadow receiveShadow><boxGeometry args={[11.2, 0.45, 9.2]} /></mesh>
-      <mesh position={[-5.2, 2.9, -8.7]} material={concreteMat}><boxGeometry args={[0.5, 5.8, 8.6]} /></mesh>
-      <mesh position={[5.2, 2.9, -8.7]} material={concreteMat}><boxGeometry args={[0.5, 5.8, 8.6]} /></mesh>
-      <mesh position={[0, 0.05, -8.7]} material={floorMat} receiveShadow><boxGeometry args={[10.5, 0.25, 9]} /></mesh>
-      <mesh position={[0, 2.9, -13.1]} material={concreteMat}><boxGeometry args={[10.5, 5.8, 0.45]} /></mesh>
-
-      {/* Exterior retaining wall and earth-covered roof. */}
-      <mesh position={[0, 6.1, -4.5]}><boxGeometry args={[12.2, 0.5, 10.4]} /><meshStandardMaterial color="#59624b" roughness={1} /></mesh>
-      <mesh position={[0, 6.25, -4.4]} scale={[6.5, 1.25, 5.4]}><sphereGeometry args={[1, 36, 22]} /><meshStandardMaterial color="#38483b" roughness={1} /></mesh>
-      {/* The aperture is kept clear by a cutaway facade. Door swings on a heavy offset hinge. */}
-      <mesh position={[-5.65, 2.8, -3.55]} material={concreteMat}><boxGeometry args={[0.35, 5.6, 0.6]} /></mesh>
-      <mesh position={[5.65, 2.8, -3.55]} material={concreteMat}><boxGeometry args={[0.35, 5.6, 0.6]} /></mesh>
-      <mesh position={[0, 5.55, -3.55]} material={concreteMat}><boxGeometry args={[11.3, 0.45, 0.6]} /></mesh>
-      <mesh position={[0, 0.35, -3.55]} material={concreteMat}><boxGeometry args={[11.3, 0.55, 0.6]} /></mesh>
-
-      <group position={[-1.65, 2.55, -3.3]} rotation={[0, -doorOpen, 0]}>
-        <mesh position={[1.65, 0, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <cylinderGeometry args={[1.62, 1.62, 0.34, 64]} />
-          <meshStandardMaterial color="#26323d" metalness={0.9} roughness={0.24} />
-        </mesh>
-        <mesh position={[1.65, 0, 0.19]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[1.43, 0.085, 12, 64]} />
-          <meshStandardMaterial color="#aab5bd" metalness={0.92} roughness={0.22} />
-        </mesh>
-        <mesh position={[1.65, 0, 0.205]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.82, 0.035, 8, 48]} />
-          <meshStandardMaterial color="#75838d" metalness={0.9} roughness={0.26} />
-        </mesh>
-        <mesh position={[1.65, 0, 0.22]}><boxGeometry args={[0.16, 1.35, 0.13]} /><meshStandardMaterial color="#89959c" metalness={0.9} roughness={0.24} /></mesh>
-        <BoltRing radius={1.49} count={16} z={0.24} />
-      </group>
-      {/* Hinge blocks, locking pistons, warning lamps. */}
-      <Pipe a={[-1.82, 1.05, -3.05]} b={[-1.82, 4.05, -3.05]} radius={0.13} color="#7d8991" />
-      <Pipe a={[-1.95, 1.2, -3.0]} b={[-1.95, 1.75, -3.0]} radius={0.19} color="#b4a17e" />
-      <mesh position={[1.95, 4.5, -3.0]}><sphereGeometry args={[0.14, 16, 12]} /><meshStandardMaterial color={alarmOn ? "#ff1b1b" : "#d7a34e"} emissive={alarmOn ? "#ff0000" : "#7a3b05"} emissiveIntensity={alarmOn ? 5 : 0.7} /></mesh>
-
-      {/* Interior: service racks, bunks, provisions, generator and filtration hardware. */}
-      {[-4.55, 4.55].map((x) => <group key={x} position={[x, 1.65, -8.2]}>
-        <mesh material={steel}><boxGeometry args={[0.16, 3.2, 0.22]} /></mesh>
-        {[-1, 0, 1].map((y) => <mesh key={y} position={[0, y * 0.9, 0.2]}><boxGeometry args={[0.95, 0.08, 0.75]} /><meshStandardMaterial color="#7b6650" roughness={0.82} /></mesh>)}
-        {Array.from({ length: 8 }, (_, i) => <mesh key={i} position={[(i % 2) * 0.36 - 0.18, -1.15 + Math.floor(i / 2) * 0.28, 0.34]}><boxGeometry args={[0.27, 0.22, 0.32]} /><meshStandardMaterial color={i % 3 ? "#7b8b63" : "#c49b5d"} roughness={0.7} /></mesh>)}
-      </group>)}
-      <group position={[0, 0.95, -10.2]}>
-        <mesh material={steel}><boxGeometry args={[1.8, 1.45, 1.2]} /></mesh>
-        <mesh position={[0, 0.76, 0]}><boxGeometry args={[1.92, 0.12, 1.3]} /><meshStandardMaterial color="#a9b3b8" metalness={0.85} roughness={0.28} /></mesh>
-        <mesh position={[0, 0.2, 0.62]}><boxGeometry args={[0.75, 0.32, 0.06]} /><meshStandardMaterial color="#6cc7c8" emissive="#1b6f77" emissiveIntensity={2} /></mesh>
-        <Pipe a={[-0.55, 1.1, -10.2]} b={[-0.55, 2.9, -10.2]} radius={0.11} />
-        <Pipe a={[0.55, 1.1, -10.2]} b={[0.55, 2.9, -10.2]} radius={0.11} color="#87949a" />
-      </group>
-      <group position={[0, 4.8, -8.1]}>
-        <mesh><boxGeometry args={[7.8, 0.12, 0.3]} /><meshStandardMaterial color="#3b4852" metalness={0.7} roughness={0.35} /></mesh>
-        {[-2.8, -1.4, 0, 1.4, 2.8].map((x) => <mesh key={x} position={[x, -0.12, 0.08]}><boxGeometry args={[0.12, 0.28, 0.2]} /><meshStandardMaterial color="#7b8a91" metalness={0.7} /></mesh>)}
-        <mesh position={[0, -0.16, 0.22]}><boxGeometry args={[3.8, 0.04, 0.05]} /><meshStandardMaterial color="#a8d9df" emissive="#438f9e" emissiveIntensity={3} /></mesh>
-      </group>
-      <mesh position={[2.6, 2.7, -12.82]}><boxGeometry args={[2.2, 1.3, 0.12]} /><meshStandardMaterial color="#1c2c38" metalness={0.45} roughness={0.4} /></mesh>
-      <mesh position={[2.6, 2.7, -12.72]}><boxGeometry args={[1.85, 0.95, 0.035]} /><meshStandardMaterial color="#153f4b" emissive="#0b5965" emissiveIntensity={1.3} /></mesh>
-      {Array.from({ length: 5 }, (_, i) => <mesh key={i} position={[1.95 + i * 0.31, 2.68 + Math.sin(i * 1.3) * 0.18, -12.68]}><boxGeometry args={[0.12, 0.36 + (i % 2) * 0.18, 0.025]} /><meshStandardMaterial color={i === 4 && alarmOn ? "#ff3131" : "#7dd0b9"} emissive={i === 4 && alarmOn ? "#ff0000" : "#185c50"} emissiveIntensity={2} /></mesh>)}
-
-      {/* Exterior approach, hazard stripes, vents and surface details. */}
-      <mesh position={[0, 0.02, 1.1]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[12, 8]} /><meshStandardMaterial color="#3a3c35" roughness={1} /></mesh>
-      {Array.from({ length: 9 }, (_, i) => <mesh key={i} position={[-4.4 + i * 1.1, 0.035, 1.1]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[0.42, 0.1]} /><meshStandardMaterial color="#c69d50" roughness={0.8} /></mesh>)}
-      {[-4.3, -3.5, 3.5, 4.3].map((x) => <group key={x} position={[x, 4.6, -3.2]}>
-        <mesh rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.28, 0.28, 0.28, 24]} /><meshStandardMaterial color="#38464f" metalness={0.8} roughness={0.32} /></mesh>
-        {[-0.12, 0, 0.12].map((z) => <mesh key={z} position={[0, 0.2, z]}><boxGeometry args={[0.5, 0.045, 0.05]} /><meshStandardMaterial color="#a8b1b3" metalness={0.8} /></mesh>)}
-      </group>)}
-
-      {/* The owner of the bunker: vector stickman silhouette. */}
-      <Stickman x={-2.7} z={1.9} scale={1.18} pose={f > 800 ? 1 : 0} />
-      <Stickman x={-1.9} z={-1.8} scale={0.72} zombie pose={1} />
-      <Stickman x={1.95} z={-1.6} scale={0.76} zombie pose={1} />
-      {/* Shapes beyond the open door: one person at the gate, then a second moving shadow. */}
-      <group position={[0, 0, -1.4]} visible={f > 690}>
-        <Stickman x={0.1} z={0} scale={0.88} zombie={false} pose={1} />
-        <mesh position={[0.65, 1.15, -0.12]} scale={[0.24, 0.7, 0.12]}><sphereGeometry args={[1, 16, 12]} /><meshStandardMaterial color="#161b20" roughness={1} /></mesh>
-      </group>
-      <group position={[0, 0, -2.1]} visible={f > 830}>
-        <Stickman x={1.45} z={0} scale={1.12} zombie pose={1} />
-      </group>
-      <pointLight position={[0.5, 1.4, -1.5]} color="#ff2525" intensity={tension * 2.4} distance={5} />
-    </>
-  );
-};
-
-const beats = [
-  { a: 0, b: 104, text: "I spent my entire $1,000,000 on a zombie-proof bunker." },
-  { a: 105, b: 225, text: "Six metres underground. Reinforced concrete. A four-tonne blast door." },
-  { a: 226, b: 390, text: "Inside: twelve months of food, recycled water, power and medical supplies." },
-  { a: 391, b: 555, text: "I thought I was ready. Then the motion sensors lit up." },
-  { a: 556, b: 735, text: "Three survivors are outside. One is bleeding. One says they're infected." },
-  { a: 736, b: 900, text: "The radio crackles: 'Open the door. Please. I'm not alone.'" },
-  { a: 901, b: 1034, text: "But the camera shows only ONE person... and something moving behind them." },
-  { a: 1035, b: 1199, text: "YOU DECIDE. Which risk would you take?" },
+const beats=[
+ {a:0,b:104,tag:"THE LAST SHELTER",text:"I spent $1,000,000 preparing for the end of the world."},
+ {a:105,b:225,tag:"BUILT TO SURVIVE",text:"Six metres underground. Reinforced concrete. A four-tonne blast door."},
+ {a:226,b:390,tag:"ONE YEAR. NO EXIT.",text:"Food, clean water, power, medicine. Everything I need to outlast the outbreak."},
+ {a:391,b:555,tag:"DAY ONE",text:"Then every motion sensor in the bunker turned red."},
+ {a:556,b:735,tag:"THREE SURVIVORS",text:"One was bleeding. One was screaming. And one wasn't moving like a human."},
+ {a:736,b:900,tag:"INCOMING TRANSMISSION",text:"The radio crackled: “Please open the door. I'm not alone.”"},
+ {a:901,b:1034,tag:"CHECK THE CAMERA",text:"But the camera showed one person… and a second shadow behind them."},
+ {a:1035,b:1199,tag:"YOUR CALL",text:"Would you risk opening the door?"}
 ];
-
-const Overlay: React.FC = () => {
-  const f = useCurrentFrame();
-  const beat = beats.find((b) => f >= b.a && f <= b.b) ?? beats[beats.length - 1];
-  const alpha = clamp(Math.min(1, (f - beat.a) / 12, (beat.b - f) / 12), 0, 1);
-  return (
-    <AbsoluteFill style={{ pointerEvents: "none", justifyContent: "space-between", padding: "9% 7% 8%", color: "white", fontFamily: "Arial, Helvetica, sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", opacity: 0.92 }}>
-        <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: 4 }}>LAST SHELTER</div>
-        <div style={{ fontSize: 20, fontWeight: 700, color: "#f4c77d" }}>DAY 01 / 30</div>
-      </div>
-      <div style={{ marginTop: "auto", marginBottom: f >= 1035 ? "auto" : "8%", opacity: alpha, textAlign: "center", textShadow: "0 3px 14px rgba(0,0,0,.9)" }}>
-        <div style={{ display: "inline-block", background: "rgba(7,13,22,.72)", border: "1px solid rgba(255,255,255,.22)", borderRadius: 16, padding: "20px 24px", maxWidth: "100%" }}>
-          <div style={{ fontSize: f < 105 ? 44 : 35, fontWeight: 900, lineHeight: 1.12 }}>{beat.text}</div>
-        </div>
-        {f >= 1035 && (
-          <div style={{ display: "flex", gap: 18, marginTop: 28, textAlign: "left" }}>
-            <div style={{ flex: 1, padding: "22px 18px", borderRadius: 16, background: "rgba(24,91,119,.94)", border: "2px solid #8de1f0" }}>
-              <div style={{ fontSize: 24, fontWeight: 900, color: "#a9efff" }}>A — OPEN</div>
-              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8 }}>Risk the bunker. Rescue them.</div>
-            </div>
-            <div style={{ flex: 1, padding: "22px 18px", borderRadius: 16, background: "rgba(110,43,42,.94)", border: "2px solid #ff9a7b" }}>
-              <div style={{ fontSize: 24, fontWeight: 900, color: "#ffc0a9" }}>B — SEAL</div>
-              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8 }}>Save yourself. Leave them outside.</div>
-            </div>
-          </div>
-        )}
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 18, fontWeight: 800, letterSpacing: 2, opacity: 0.85 }}>
-        <span>COMMENT A OR B</span><span>PART 01</span>
-      </div>
-    </AbsoluteFill>
-  );
+const Overlay:React.FC=()=>{
+ const f=useCurrentFrame(), beat=beats.find(b=>f>=b.a&&f<=b.b)||beats[beats.length-1], opacity=fade(f,beat.a,beat.b);
+ const final=f>=1035;
+ return <AbsoluteFill style={{pointerEvents:"none",fontFamily:"Arial,Helvetica,sans-serif",color:"#fff",padding:"7% 7% 8%",justifyContent:"space-between"}}>
+  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:19,fontWeight:900,letterSpacing:3,textShadow:"0 2px 8px #07111c"}}>
+   <span>LAST SHELTER</span><span style={{color:"#f1c27b"}}>01 / 06</span>
+  </div>
+  <div style={{marginTop:"auto",marginBottom:final?"auto":"7%",opacity,textAlign:"left",maxWidth:"100%"}}>
+   <div style={{fontSize:18,fontWeight:900,letterSpacing:4,color:"#f3bd72",marginBottom:15,textShadow:"0 2px 6px #07111c"}}>{beat.tag}</div>
+   <div style={{fontSize:39,fontWeight:900,lineHeight:1.08,letterSpacing:-1.1,textShadow:"0 3px 15px rgba(0,0,0,.95)",maxWidth:490}}>{beat.text}</div>
+   {final&&<div style={{display:"flex",gap:12,marginTop:28}}>
+    <div style={{flex:1,background:"#174f61",border:"2px solid #85d8df",padding:"18px 14px",borderRadius:12}}><div style={{fontSize:22,fontWeight:900,color:"#a8f0f2"}}>A — OPEN</div><div style={{fontSize:19,fontWeight:700,marginTop:7}}>Let them in.</div></div>
+    <div style={{flex:1,background:"#652f32",border:"2px solid #f09b7e",padding:"18px 14px",borderRadius:12}}><div style={{fontSize:22,fontWeight:900,color:"#ffc0a6"}}>B — SEAL</div><div style={{fontSize:19,fontWeight:700,marginTop:7}}>Save the bunker.</div></div>
+   </div>}
+  </div>
+  <div style={{display:"flex",justifyContent:"space-between",fontSize:15,fontWeight:900,letterSpacing:2,textShadow:"0 2px 8px #07111c"}}><span>COMMENT A OR B</span><span>PART 01</span></div>
+ </AbsoluteFill>;
 };
-
-export const BunkerSurvival: React.FC = () => {
-  useCurrentFrame();
-  return (
-    <AbsoluteFill style={{ background: "#111c2c" }}>
-      <ThreeCanvas width={1080} height={1920} shadows camera={{ position: [8.5, 6.2, 14.5], fov: 39, near: 0.1, far: 100 }} gl={{ antialias: true, powerPreference: "high-performance" }}>
-        <BunkerWorld />
-      </ThreeCanvas>
-      <Overlay />
-    </AbsoluteFill>
-  );
+export const BunkerSurvival:React.FC=()=>{
+ const f=useCurrentFrame();
+ return <AbsoluteFill style={{background:"#101c29"}}><BunkerArt f={f}/><Overlay/></AbsoluteFill>;
 };
