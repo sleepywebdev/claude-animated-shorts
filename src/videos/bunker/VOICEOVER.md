@@ -1,7 +1,7 @@
 # LAST SHELTER — Episode 01: The Million-Dollar Bunker
 
 **Format:** 9:16 vertical · 1080×1920 · 30 fps · 40 seconds  
-**Visual direction:** premium 2D vector animation. Layered illustrated environments, bold inked silhouettes, expressive character acting, painterly gradients, restrained grain and hatch texture, dramatic rim lighting, deep parallax, purposeful camera moves. No 3D models, no stick figures, no generic flat icon look.
+**Visual direction:** clean, polished 2D vector animation with recognisable stickman characters. Characters have round heads, expressive minimal faces, clearly articulated line limbs, simple coloured torso shapes, readable poses and consistent proportions. Use smooth rounded strokes, controlled outlines, restrained highlights and subtle shadows. Keep the bunker environment detailed with crisp geometric vector architecture, layered props, depth, parallax and cinematic lighting. No anime, no realistic human anatomy, no 3D models, no painterly rendering, and no crude doodle style.
 
 ## Revised voice-over
 
