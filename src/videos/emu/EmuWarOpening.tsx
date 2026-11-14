@@ -101,8 +101,8 @@ const OpeningScene:React.FC=()=>{
  const emus=Array.from({length:17},(_,i)=><SpriteCard key={i} kind="emu" position={[-8+i*.92,.45,-18-hash(i+50)*2]} scale={[.65,1.25,1]}/>);
  return <>
   <color attach="background" args={["#e9b77f"]}/>
-  <mesh onUpdate={(o)=>o.layers.set(NOINK)}><sphereGeometry args={[100,48,24]}/><shaderMaterial side={THREE.BackSide} depthWrite={false} vertexShader={`varying vec3 vP; void main(){vP=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`} fragmentShader={`varying vec3 vP; void main(){float h=clamp(vP.y,0.0,1.0);vec3 horizon=vec3(0.82,0.48,0.34);vec3 top=vec3(0.36,0.27,0.40);vec3 c=mix(horizon,top,smoothstep(0.0,0.72,h));gl_FragColor=vec4(c,1.0);}`}/></mesh>
-  <fog attach="fog" args={["#e8bb91",22,65]}/>
+  <mesh onUpdate={(o)=>o.layers.set(NOINK)}><sphereGeometry args={[100,48,24]}/><shaderMaterial side={THREE.BackSide} depthWrite={false} vertexShader={`varying vec3 vP; void main(){vP=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`} fragmentShader={`varying vec3 vP; void main(){float h=clamp(vP.y,0.0,1.0);vec3 horizon=vec3(1.0,0.36,0.05);vec3 top=vec3(0.25,0.16,0.25);vec3 c=mix(horizon,top,smoothstep(0.0,0.72,h));gl_FragColor=vec4(c,1.0);}`}/></mesh>
+  <fog attach="fog" args={["#efb489",22,65]}/>
   <ambientLight intensity={1.25}/>
   <directionalLight position={[-8,9,7]} intensity={2.3} color="#ffcf9e"/>
   <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.05,-5]}><planeGeometry args={[90,90]}/><meshLambertMaterial map={dirt} color="#ffffff" roughness={1}/></mesh>
