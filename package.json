@@ -18,7 +18,7 @@
     "@remotion/three": "4.0.290",
     "@remotion/bundler": "4.0.290",
     "@remotion/renderer": "4.0.290",
-    "postprocessing": "6.37.2",
+    "postprocessing": "6.37.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "remotion": "4.0.290",
