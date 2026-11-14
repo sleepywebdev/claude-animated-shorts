@@ -105,7 +105,7 @@ const OpeningScene:React.FC=()=>{
   <fog attach="fog" args={["#efb489",22,65]}/>
   <ambientLight intensity={1.25}/>
   <directionalLight position={[-8,9,7]} intensity={2.3} color="#ffcf9e"/>
-  <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.05,-5]}><planeGeometry args={[90,90]}/><meshLambertMaterial map={dirt} color="#ffffff" roughness={1}/></mesh>
+  <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.05,-5]}><planeGeometry args={[90,90]}/><meshLambertMaterial map={dirt} color="#ffffff"/></mesh>
   <mesh position={[0,1.8,-27]}><planeGeometry args={[90,9]}/><meshBasicMaterial color="#c98c64"/></mesh>
   <mesh position={[0,9,-35]}><sphereGeometry args={[1.2,24,16]}/><meshBasicMaterial color="#ffcf9e"/></mesh>
   {wheat.map((w,i)=><Wheat key={i} {...w}/>)}
