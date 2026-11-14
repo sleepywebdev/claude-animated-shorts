@@ -1,0 +1,38 @@
+name: Render Zombie Bunker frame sheet
+on:
+  push:
+    branches: [zombie-bunker-experiment]
+    paths:
+      - "src/videos/bunker/**"
+      - "src/Root.tsx"
+      - ".github/workflows/render-bunker-frame-sheet.yml"
+  workflow_dispatch:
+jobs:
+  render-frame-sheet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: zombie-bunker-experiment
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --legacy-peer-deps
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+      - name: Install Remotion browser
+        run: npx remotion browser ensure
+      - name: Render actual Remotion frames
+        run: |
+          mkdir -p out/bunker
+          node scripts/bridge-stills.mjs out/bunker/frame- 0,120,270,390,540,690,810,960,1100,1199 0.5 BunkerSurvival
+      - name: Assemble contact sheet
+        run: |
+          montage out/bunker/frame-*.jpg -tile 5x -geometry 540x960+10+10 -background "#111c2c" out/bunker/bunker-frame-sheet.jpg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zombie-bunker-frame-sheet
+          path: out/bunker/bunker-frame-sheet.jpg
+          if-no-files-found: error
+          retention-days: 7
