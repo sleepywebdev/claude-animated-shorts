@@ -5,6 +5,7 @@ on:
     paths:
       - "src/videos/bunker/**"
       - "src/Root.tsx"
+      - "package.json"
       - ".github/workflows/render-bunker-frame-sheet.yml"
   workflow_dispatch:
 jobs:
