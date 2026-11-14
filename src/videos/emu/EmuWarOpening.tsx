@@ -21,14 +21,16 @@ function cardTexture(kind:"soldier"|"emu"|"lookout") {
   const path=(pts:number[][],fill:string,width=8)=>{g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.strokeStyle=ink;g.lineWidth=width;g.stroke();g.fillStyle=fill;g.fill();};
   if(kind==="soldier"){
     // Flat bean-head card, deliberately not a 3D human.
-    path([[82,235],[76,190],[84,140],[112,108],[151,110],[178,139],[182,190],[171,232],[150,250],[105,248]],"#f2d2b0",10);
-    g.fillStyle="#2a201f";g.fillRect(83,102,91,24);g.fillRect(99,74,61,35);
-    g.fillStyle=ink;g.beginPath();g.ellipse(111,177,7,10,0,0,Math.PI*2);g.ellipse(151,177,7,10,0,0,Math.PI*2);g.fill();
-    g.beginPath();g.moveTo(108,208);g.quadraticCurveTo(130,216,153,207);g.strokeStyle=ink;g.lineWidth=5;g.stroke();
+    path([[72,205],[70,172],[84,140],[111,121],[148,121],[177,140],[187,172],[178,205],[158,226],[103,226]],"#f2d2b0",10);
+    path([[73,130],[79,96],[111,76],[151,80],[181,100],[192,120],[166,128],[88,127]],"#77745b",8);
+    g.strokeStyle=ink;g.lineWidth=7;g.beginPath();g.moveTo(74,126);g.quadraticCurveTo(130,139,192,120);g.stroke();
+    g.fillStyle=ink;g.beginPath();g.ellipse(111,168,7,9,0,0,Math.PI*2);g.ellipse(151,168,7,9,0,0,Math.PI*2);g.fill();
+    g.beginPath();g.moveTo(108,194);g.quadraticCurveTo(130,202,153,193);g.strokeStyle=ink;g.lineWidth=5;g.stroke();
     path([[88,250],[168,250],[188,377],[70,377]],"#8b9271",10);
     path([[99,377],[118,377],[111,469],[88,469]],"#a9a18b",8);path([[145,377],[164,377],[177,469],[153,469]],"#a9a18b",8);
     path([[78,462],[111,462],[115,484],[69,484]],"#34343a",8);path([[153,462],[180,462],[190,484],[151,484]],"#34343a",8);
     g.strokeStyle=ink;g.lineWidth=13;g.beginPath();g.moveTo(79,270);g.lineTo(50,352);g.moveTo(176,270);g.lineTo(204,342);g.stroke();
+    g.strokeStyle="#c8bda2";g.lineWidth=5;for(let y=391;y<454;y+=13){g.beginPath();g.moveTo(91,y);g.lineTo(114,y-8);g.moveTo(148,y-8);g.lineTo(171,y);g.stroke();}
   } else {
     const body=kind==="lookout"?"#393039":"#645b50";
     path([[61,267],[72,219],[111,191],[169,205],[199,246],[185,313],[138,348],[81,327]],body,10);
@@ -117,6 +119,7 @@ const OpeningScene:React.FC=()=>{
    <mesh position={[0,.64,-.25]}><cylinderGeometry args={[.3,.3,.12,24]}/><meshStandardMaterial color="#6b7074" metalness:.45 roughness:.5/></mesh>
    <mesh position={[-.12,-.3,-.45]} rotation={[0,0,-.15]}><boxGeometry args={[.08,.75,.08]}/><meshStandardMaterial color="#414447"/></mesh>
    <mesh position={[.12,-.3,-.45]} rotation={[0,0,.15]}><boxGeometry args={[.08,.75,.08]}/><meshStandardMaterial color="#414447"/></mesh>
+   <mesh position={[0,-.34,-.88]} rotation={[.12,0,0]}><boxGeometry args={[.075,.72,.075]}/><meshStandardMaterial color="#414447"/></mesh>
   </group>
   <mesh position={[0,0.02,0]}><boxGeometry args={[2.1,.06,.1]}/><meshStandardMaterial color="#76502f"/></mesh>
   <PostProcess/>
