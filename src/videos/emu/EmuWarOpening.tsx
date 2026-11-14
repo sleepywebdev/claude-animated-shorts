@@ -49,6 +49,14 @@ const SpriteCard:React.FC<{kind:"soldier"|"emu"|"lookout";position:[number,numbe
  return <mesh position={position} scale={scale} onUpdate={(o)=>o.layers.set(NOINK)}><planeGeometry args={[1,1]}/><meshLambertMaterial map={map} transparent alphaTest={0.12} side={THREE.DoubleSide}/></mesh>;
 };
 
+const dirtTexture=()=>{
+ const canvas=document.createElement("canvas");canvas.width=1024;canvas.height=1024;
+ const g=canvas.getContext("2d")!;g.fillStyle="#a65f3b";g.fillRect(0,0,1024,1024);
+ for(let i=0;i<190;i++){const x=hash(i)*1024,y=hash(i+31)*1024,r=25+hash(i+63)*90;g.fillStyle=i%3===0?"rgba(75,45,35,.10)":"rgba(225,165,105,.10)";g.beginPath();g.ellipse(x,y,r,r*.38,hash(i+92)*Math.PI,0,Math.PI*2);g.fill();}
+ for(let i=0;i<1600;i++){const x=hash(i+100)*1024,y=hash(i+400)*1024;g.strokeStyle=i%3===0?"rgba(74,63,43,.35)":"rgba(216,176,112,.45)";g.lineWidth=1+hash(i+800)*2;g.beginPath();g.moveTo(x,y);g.lineTo(x+2+hash(i+900)*10,y-2-hash(i+1200)*8);g.stroke();}
+ const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;tex.wrapS=tex.wrapT=THREE.RepeatWrapping;return tex;
+};
+
 const Wheat:React.FC<{x:number;z:number;h:number;lean:number}> = ({x,z,h,lean})=>(
  <group position={[x,0,z]} rotation={[0,0,lean]}>
   <mesh position={[0,h/2,0]}><cylinderGeometry args={[0.012,0.02,h,5]}/><meshStandardMaterial color="#9a7a3e" roughness={1}/></mesh>
@@ -85,15 +93,17 @@ const OpeningScene:React.FC=()=>{
  const move=ease(frame/35);
  camera.position.set(-1.5+0.18*move,3.1-0.25*move,14-1.2*move);
  camera.lookAt(-1.5,1.7,-2.5);
+ const dirt=useMemo(()=>dirtTexture(),[]);
  const wheat=useMemo(()=>Array.from({length:440},(_,i)=>({x:(hash(i)-.5)*35,z:-12+hash(i+700)*25,h:.75+hash(i+1300)*1.25,lean:(hash(i+2200)-.5)*.25})),[]);
  const soldiers=[-3.3,-2.4,-1.5,-.6,.3].map((x,i)=><SpriteCard key={i} kind="soldier" position={[x,1.05,2.1+(i%2)*.15]} scale={[.78,2.1,1]}/>);
  const emus=Array.from({length:17},(_,i)=><SpriteCard key={i} kind="emu" position={[-8+i*.92,.45,-18-hash(i+50)*2]} scale={[.65,1.25,1]}/>);
  return <>
   <color attach="background" args={["#e9b77f"]}/>
+  <mesh onUpdate={(o)=>o.layers.set(NOINK)}><sphereGeometry args={[100,48,24]}/><shaderMaterial side={THREE.BackSide} depthWrite={false} vertexShader={`varying vec3 vP; void main(){vP=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`} fragmentShader={`varying vec3 vP; void main(){float h=clamp(vP.y,0.0,1.0);vec3 horizon=vec3(0.82,0.48,0.34);vec3 top=vec3(0.36,0.27,0.40);vec3 c=mix(horizon,top,smoothstep(0.0,0.72,h));gl_FragColor=vec4(c,1.0);}`}/></mesh>
   <fog attach="fog" args={["#e8bb91",22,65]}/>
   <ambientLight intensity={1.25}/>
   <directionalLight position={[-8,9,7]} intensity={2.3} color="#ffcf9e"/>
-  <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.05,-5]}><planeGeometry args={[90,90]}/><meshStandardMaterial color="#a65f3b" roughness={1}/></mesh>
+  <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.05,-5]}><planeGeometry args={[90,90]}/><meshLambertMaterial map={dirt} color="#ffffff" roughness={1}/></mesh>
   <mesh position={[0,1.8,-27]}><planeGeometry args={[90,9]}/><meshBasicMaterial color="#c98c64"/></mesh>
   <mesh position={[0,9,-35]}><sphereGeometry args={[1.2,24,16]}/><meshBasicMaterial color="#ffcf9e"/></mesh>
   {wheat.map((w,i)=><Wheat key={i} {...w}/>)}
