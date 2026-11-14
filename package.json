@@ -6,7 +6,10 @@
     "dev": "remotion studio src/index.ts",
     "render:bridge": "remotion render src/index.ts BridgeShort out/bridge.mp4",
     "stills:bridge": "node scripts/bridge-stills.mjs out/bridge/b_ 100,400,1100 0.5",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "stills:emu": "node scripts/bridge-stills.mjs out/emu/shot01_ 0,18,35 0.5 EmuWarOpening",
+    "render:emu:preview": "remotion render src/index.ts EmuWarOpening out/emu/shot01-preview.mp4 --scale 0.5",
+    "render:emu:final": "remotion render src/index.ts EmuWarOpening out/emu/shot01.mp4 --scale 1.3333"
   },
   "dependencies": {
     "@react-three/fiber": "9.1.2",
