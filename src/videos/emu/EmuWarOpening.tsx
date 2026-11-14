@@ -54,11 +54,11 @@ const Wheat:React.FC<{x:number;z:number;h:number;lean:number}> = ({x,z,h,lean})=
 const OpeningScene:React.FC=()=>{
  const frame=useCurrentFrame(); const {camera}=useThree();
  const t=frame/FPS;
- const move=ease(frame/126);
- camera.position.set(0.2+0.25*move,3.1-0.3*move,14-2.1*move);
- camera.lookAt(0,1.7,-2.5);
+ const move=ease(frame/35);
+ camera.position.set(-1.5+0.18*move,3.1-0.25*move,14-1.2*move);
+ camera.lookAt(-1.5,1.7,-2.5);
  const wheat=useMemo(()=>Array.from({length:440},(_,i)=>({x:(hash(i)-.5)*35,z:-12+hash(i+700)*25,h:.75+hash(i+1300)*1.25,lean:(hash(i+2200)-.5)*.25})),[]);
- const soldiers=[-2.7,-1.8,-.9,0,0.9].map((x,i)=><SpriteCard key={i} kind="soldier" position={[x,1.05,2.1+(i%2)*.15]} scale={[.78,2.1,1]}/>);
+ const soldiers=[-3.3,-2.4,-1.5,-.6,.3].map((x,i)=><SpriteCard key={i} kind="soldier" position={[x,1.05,2.1+(i%2)*.15]} scale={[.78,2.1,1]}/>);
  const emus=Array.from({length:17},(_,i)=><SpriteCard key={i} kind="emu" position={[-8+i*.92,.45,-18-hash(i+50)*2]} scale={[.65,1.25,1]}/>);
  return <>
   <color attach="background" args={["#e9b77f"]}/>
@@ -73,7 +73,7 @@ const OpeningScene:React.FC=()=>{
   {emus}
   <SpriteCard kind="lookout" position={[7.4,.62,-17.6]} scale={[.88,1.85,1]}/>
   {/* Lewis gun silhouette: cooling jacket, receiver and top pan magazine. */}
-  <group position={[-2.4,1.2,1.4]} rotation={[0,-.1,0]}>
+  <group position={[-3.65,1.2,1.4]} rotation={[0,-.1,0]}>
    <mesh position={[0,.35,-.45]}><boxGeometry args={[.65,.28,1.25]}/><meshStandardMaterial color="#4b4b49" roughness={.75}/></mesh>
    <mesh position={[0,.42,-1.2]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.075,.075,.95,12]}/><meshStandardMaterial color="#59616a" metalness:.5 roughness:.45/></mesh>
    <mesh position={[0,.64,-.25]}><cylinderGeometry args={[.3,.3,.12,24]}/><meshStandardMaterial color="#6b7074" metalness:.45 roughness:.5/></mesh>
