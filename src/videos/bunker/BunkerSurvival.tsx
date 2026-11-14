@@ -87,7 +87,7 @@ const BunkerWorld: React.FC = () => {
   const tension = smooth(650, 810, f);
   const camX = THREE.MathUtils.lerp(8.5, 0.2, enter);
   const camY = THREE.MathUtils.lerp(6.2, 2.8, enter);
-  const camZ = THREE.MathUtils.lerp(14.5, 5.6, enter);
+  const camZ = THREE.MathUtils.lerp(18.5, 5.6, enter);
   camera.position.set(camX, camY + Math.sin(f / 75) * 0.035, camZ);
   camera.lookAt(0, THREE.MathUtils.lerp(2.2, 2.35, enter), THREE.MathUtils.lerp(-0.8, -4.6, enter));
   camera.updateProjectionMatrix();
@@ -132,7 +132,6 @@ const BunkerWorld: React.FC = () => {
       <mesh position={[0, 2.9, -13.1]} material={concreteMat}><boxGeometry args={[10.5, 5.8, 0.45]} /></mesh>
 
       {/* Exterior retaining wall and earth-covered roof. */}
-      <mesh position={[0, 3.05, -4.4]} material={concreteMat} castShadow><boxGeometry args={[11.3, 6.1, 1.45]} /></mesh>
       <mesh position={[0, 6.1, -4.5]}><boxGeometry args={[12.2, 0.5, 10.4]} /><meshStandardMaterial color="#59624b" roughness={1} /></mesh>
       <mesh position={[0, 6.25, -4.4]} scale={[6.5, 1.25, 5.4]}><sphereGeometry args={[1, 36, 22]} /><meshStandardMaterial color="#38483b" roughness={1} /></mesh>
       {/* The aperture is kept clear by a cutaway facade. Door swings on a heavy offset hinge. */}
@@ -223,7 +222,7 @@ const beats = [
 const Overlay: React.FC = () => {
   const f = useCurrentFrame();
   const beat = beats.find((b) => f >= b.a && f <= b.b) ?? beats[beats.length - 1];
-  const alpha = Math.min(1, (f - beat.a) / 12, (beat.b - f) / 12);
+  const alpha = clamp(Math.min(1, (f - beat.a) / 12, (beat.b - f) / 12), 0, 1);
   return (
     <AbsoluteFill style={{ pointerEvents: "none", justifyContent: "space-between", padding: "9% 7% 8%", color: "white", fontFamily: "Arial, Helvetica, sans-serif" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", opacity: 0.92 }}>
