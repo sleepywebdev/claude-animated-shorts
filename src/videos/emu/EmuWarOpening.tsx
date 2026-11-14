@@ -1,8 +1,13 @@
-import React, {useMemo} from "react";
+import React, {useEffect, useMemo} from "react";
 import * as THREE from "three";
 import {AbsoluteFill, useCurrentFrame} from "remotion";
 import {ThreeCanvas} from "@remotion/three";
 import {useThree} from "@react-three/fiber";
+import {EffectComposer} from "@react-three/postprocessing";
+import {BloomEffect, BlendFunction, ToneMappingEffect, ToneMappingMode} from "postprocessing";
+import {InkPass, noInkFallback, NOINK} from "../bridge/ink";
+import {LensBlur} from "../bridge/lensblur";
+import {GradeEffect, GRADES, GRADE_STRENGTH, gradeFor} from "../bridge/grade";
 
 const FPS=30;
 const clamp=(v:number,a=0,b=1)=>Math.max(a,Math.min(b,v));
@@ -41,7 +46,7 @@ function cardTexture(kind:"soldier"|"emu"|"lookout") {
 
 const SpriteCard:React.FC<{kind:"soldier"|"emu"|"lookout";position:[number,number,number];scale?:[number,number,number];}> = ({kind,position,scale=[1,2,1]})=>{
  const map=useMemo(()=>cardTexture(kind),[kind]);
- return <mesh position={position} scale={scale}><planeGeometry args={[1,1]}/><meshBasicMaterial map={map} transparent alphaTest={0.12} side={THREE.DoubleSide}/></mesh>;
+ return <mesh position={position} scale={scale} onUpdate={(o)=>o.layers.set(NOINK)}><planeGeometry args={[1,1]}/><meshLambertMaterial map={map} transparent alphaTest={0.12} side={THREE.DoubleSide}/></mesh>;
 };
 
 const Wheat:React.FC<{x:number;z:number;h:number;lean:number}> = ({x,z,h,lean})=>(
@@ -50,6 +55,29 @@ const Wheat:React.FC<{x:number;z:number;h:number;lean:number}> = ({x,z,h,lean})=
   <mesh position={[0,h+0.08,0]} rotation={[0,0,-0.12]}><coneGeometry args={[0.045,0.2,5]}/><meshStandardMaterial color="#c8a45b" roughness={1}/></mesh>
  </group>
 );
+
+const PostProcess:React.FC=()=>{
+ const {scene,camera}=useThree();
+ const fx=useMemo(()=>({
+  ink:new InkPass(scene,camera as THREE.PerspectiveCamera),
+  lens:new LensBlur({maxCoC:24,nearScale:1.2}),
+  bloom:new BloomEffect({blendFunction:BlendFunction.ADD,intensity:0.5,luminanceThreshold:1.0,luminanceSmoothing:0.2,mipmapBlur:true,levels:6,radius:0.6}),
+  tone:new ToneMappingEffect({mode:ToneMappingMode.NEUTRAL}),
+  grade:new GradeEffect(GRADES.golden,GRADE_STRENGTH.golden),
+ }),[scene,camera]);
+ useEffect(()=>()=>fx.ink.dispose(),[fx]);
+ noInkFallback(scene);
+ gradeFor(fx.grade,"golden");
+ fx.lens.cInf=0; // the opening is an establishing wide; reserve DOF for the planned foreground-wheat close shot
+ return <EffectComposer multisampling={4}>
+  <primitive object={fx.ink} dispose={null}/>
+  <primitive object={fx.lens.pre} dispose={null}/>
+  <primitive object={fx.lens.main} dispose={null}/>
+  <primitive object={fx.bloom} dispose={null}/>
+  <primitive object={fx.tone} dispose={null}/>
+  <primitive object={fx.grade} dispose={null}/>
+ </EffectComposer>;
+};
 
 const OpeningScene:React.FC=()=>{
  const frame=useCurrentFrame(); const {camera}=useThree();
@@ -81,6 +109,7 @@ const OpeningScene:React.FC=()=>{
    <mesh position={[.12,-.3,-.45]} rotation={[0,0,.15]}><boxGeometry args={[.08,.75,.08]}/><meshStandardMaterial color="#414447"/></mesh>
   </group>
   <mesh position={[0,0.02,0]}><boxGeometry args={[2.1,.06,.1]}/><meshStandardMaterial color="#76502f"/></mesh>
+  <PostProcess/>
  </>;
 };
 
