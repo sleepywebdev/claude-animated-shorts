@@ -115,8 +115,8 @@ const OpeningScene:React.FC=()=>{
   {/* Lewis gun silhouette: cooling jacket, receiver and top pan magazine. */}
   <group position={[-3.65,1.2,1.4]} rotation={[0,-.1,0]}>
    <mesh position={[0,.35,-.45]}><boxGeometry args={[.65,.28,1.25]}/><meshStandardMaterial color="#4b4b49" roughness={.75}/></mesh>
-   <mesh position={[0,.42,-1.2]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.075,.075,.95,12]}/><meshStandardMaterial color="#59616a" metalness:.5 roughness:.45/></mesh>
-   <mesh position={[0,.64,-.25]}><cylinderGeometry args={[.3,.3,.12,24]}/><meshStandardMaterial color="#6b7074" metalness:.45 roughness:.5/></mesh>
+   <mesh position={[0,.42,-1.2]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[.075,.075,.95,12]}/><meshStandardMaterial color="#59616a" metalness={.5} roughness={.45}/></mesh>
+   <mesh position={[0,.64,-.25]}><cylinderGeometry args={[.3,.3,.12,24]}/><meshStandardMaterial color="#6b7074" metalness={.45} roughness={.5}/></mesh>
    <mesh position={[-.12,-.3,-.45]} rotation={[0,0,-.15]}><boxGeometry args={[.08,.75,.08]}/><meshStandardMaterial color="#414447"/></mesh>
    <mesh position={[.12,-.3,-.45]} rotation={[0,0,.15]}><boxGeometry args={[.08,.75,.08]}/><meshStandardMaterial color="#414447"/></mesh>
    <mesh position={[0,-.34,-.88]} rotation={[.12,0,0]}><boxGeometry args={[.075,.72,.075]}/><meshStandardMaterial color="#414447"/></mesh>
