@@ -1,52 +1,71 @@
 # LAST SHELTER — Episode 01: The Million-Dollar Bunker
 
-**Format:** vertical 9:16, 1080×1920, 30 fps  
-**Duration:** 40 seconds (1,200 frames)  
-**Visual composition:** `BunkerSurvival` in `src/Root.tsx`  
-**Status:** first visual/story pass; narration and final sound mix are not attached yet.
+**Format:** 9:16 vertical · 1080×1920 · 30 fps · 40 seconds  
+**Visual direction:** premium 2D vector animation. Layered illustrated environments, bold inked silhouettes, expressive character acting, painterly gradients, restrained grain and hatch texture, dramatic rim lighting, deep parallax, purposeful camera moves. No 3D models, no stick figures, no generic flat icon look.
 
-## Voice-over draft
+## Revised voice-over
 
-I spent one million dollars building a bunker for the zombie apocalypse.
+I spent one million dollars preparing for the end of the world.
 
-Not a shed with a lock. A real underground fortress: six metres of reinforced concrete, a four-tonne blast door, its own generator, and a water system that recycles every drop.
+Not a panic room. Not a basement with a lock. A fortress buried six metres underground.
 
-I stocked enough food for a year, medicine, tools, and four beds. The plan was simple: stay inside until the outbreak burns itself out.
+Reinforced concrete. A four-tonne blast door. Independent power. Water filtration. Enough food and medicine to survive for a year.
 
-Then, on day one, the motion sensors triggered.
+I had planned for everything.
 
-Three people were standing outside. One was bleeding. One kept shouting that the others were infected.
+At least, I thought I had.
 
-I switched on the external camera. There was only one person in frame.
+Because on the first night, every motion sensor lit up.
 
-Then something moved behind them.
+Three survivors were outside. One was bleeding. One was screaming at the others to stay back.
 
-The radio crackled: "Please. Open the door. I'm not alone."
+I pulled up the security feed.
 
-I have two choices. Open the airlock and risk everything I've built… or seal the bunker and leave them outside.
+There was only one person standing at the door.
 
-What should I do?
+Then a second shadow moved behind them.
 
-**A: OPEN THE DOOR.**  
-**B: SEAL THE BUNKER.**
+The radio crackled.
+
+“Please… open the door. I'm not alone.”
+
+The airlock is ready. The locks are disengaging.
+
+But if I open that door, whatever is out there could get in.
+
+**Do I open it… or seal the bunker forever?**
+
+**A — OPEN THE DOOR.** Risk everything to save them.  
+**B — SEAL THE BUNKER.** Protect the people already inside.
+
+## Storyboard and direction
+
+| Time | Visual direction |
+|---|---|
+| 0–3s | Start on a dramatic close view of the blast door. A warning light sweeps across its steel surface. Pull back to reveal the bunker buried beneath a desolate landscape. |
+| 3–8s | Cutaway cross-section: camera tracks through the concrete shell, revealing its thickness, bolts, pressure seals and reinforced door. Use labels as environmental graphics, not floating paragraphs. |
+| 8–15s | The door rotates open with weight. Camera pushes into the bunker. Reveal shelves of supplies, water tanks, bunks, generator and filtration system in distinct layered planes. |
+| 15–19s | Brief calm. The owner moves through the room. A sensor blinks once. Then the entire warning strip snaps red. |
+| 19–25s | Three quick exterior inserts: a bloodied sleeve, a terrified face, a hand pounding the blast door. Use silhouettes and foreground framing to build unease. |
+| 25–31s | Security monitor close-up. One survivor stands in the centre of the frame. A second shadow slides across the wall behind them. |
+| 31–35s | Extreme close-up of the radio speaker. Static pulses. The voice says, “Please… open the door. I'm not alone.” Music drops away. |
+| 35–40s | Return to the blast door. Lock indicators begin changing. Hold on the two choices: OPEN or SEAL. End before the door moves. |
+
+## Art and motion rules
+
+- Characters must have readable silhouettes, distinct clothing, facial expressions and body language. Keep their designs consistent between shots.
+- Environments should feel illustrated and authored: layered shapes, varied line weight, material detail, cast shadows, controlled texture and strong foreground/background separation.
+- Use slow parallax for establishing shots, purposeful push-ins for reveals, and sharp cuts for alarms or impacts.
+- Avoid constant movement. Let important details settle long enough to read.
+- Keep captions short, high contrast and inside the central safe area.
+- The final decision remains unresolved. Episode 02 follows the audience vote.
 
 ## Sound direction
 
-- 0–8 s: low sub-bass rumble, distant wind, heavy industrial ambience.
-- 8–18 s: generator hum, ventilation, soft relay clicks as the bunker systems are revealed.
-- 18–27 s: motion-sensor chirp, rising warning pulse, distant impacts outside.
-- 27–34 s: radio static and close-mic voice; drop the music under "I'm not alone."
-- 34–40 s: one deep metallic impact, then cut almost all sound under the A/B decision.
-
-## Story and visual beats
-
-| Time | Visual |
-|---|---|
-| 0–3 s | Establish the bunker as the million-dollar purchase. |
-| 3–8 s | Slow reveal of the reinforced shell and circular blast door. |
-| 8–18 s | Door opens; camera glides into the stocked interior and machinery. |
-| 18–27 s | Sensors trip; red warning light begins pulsing. |
-| 27–34 s | A lone figure appears at the entrance; a second shape moves behind them. |
-| 34–40 s | Hold on the open doorway, then present the two audience choices. |
-
-The two choices are intentionally unresolved. Episode 02 should follow the audience vote rather than reveal a predetermined answer.
+- 0–8s: low wind, distant rumble, subtle metallic resonance.
+- 8–15s: heavy door hydraulics, layered mechanical clicks, generator hum.
+- 15–19s: quiet room tone, one sensor chirp, then a sudden alarm pulse.
+- 19–25s: muffled impacts, hurried footsteps, distant shouting.
+- 25–31s: monitor hiss, electrical buzz, one low-frequency movement cue.
+- 31–35s: radio static and close, frightened voice. Strip the music under “I'm not alone.”
+- 35–40s: lock disengagement clicks, one deep impact, then near silence under the vote.
