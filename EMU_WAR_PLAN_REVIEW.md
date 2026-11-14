@@ -21,10 +21,10 @@
 The first scene exists at `src/videos/emu/EmuWarOpening.tsx` and is registered as `EmuWarOpening` (126 frames / 4.2 seconds). It uses a procedural 3D field, simple Lewis-gun geometry, and CanvasTexture 2D character cards. It is an animatic prototype, not a final look-matched shot.
 
 ### Differences still to fix before calling it style-matched
-1. Add the repository's world-ink pass, lens blur and grade chain to this composition. The current opening scene is not yet using the same post stack.
-2. Replace the simple ground/horizon colours with painted HD CanvasTextures and the Wheatbelt palette.
+1. The shared world-ink, lens, bloom, tone-map and grade stack is now wired into this composition; it still needs an actual render to verify shader compatibility and line quality.
+2. Ground now has a procedural painted dirt texture and the sky has a golden gradient; the wider Wheatbelt environment still needs its farmhouse, dam, windpump, gum trees and period props.
 3. Rework the composition so the soldiers and Lewis gun read clearly as a group on the left; avoid overlap.
-4. Add proper tripod geometry, slouch hats/puttees, wheat foreground framing, ground shadows and a subtle low backlight.
+4. The gun has a basic bipod/tripod-like support, but it needs a more readable three-leg tripod, historically appropriate slouch hats/puttees, foreground wheat framing and character contact shadows.
 5. Give the emu flock a coherent, frame-seeded motion; the current far silhouettes are a layout placeholder.
 6. Recheck camera move and composition with actual rendered stills.
 
